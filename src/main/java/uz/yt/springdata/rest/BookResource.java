@@ -24,7 +24,7 @@ public class BookResource {
 
     @PostMapping("/book")
     public ResponseDTO<BookDTO> addBook(@RequestBody BookDTO bookDTO){
-        return bookService.addBook(bookDTO, null);
+        return bookService.addBook(bookDTO);
     }
 
     @PutMapping("/book")

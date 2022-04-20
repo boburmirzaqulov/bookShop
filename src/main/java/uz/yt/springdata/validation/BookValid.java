@@ -23,7 +23,7 @@ public class BookValid {
     }
 
     public ResponseDTO<BookDTO> validPublishedDate(BookDTO bookDTO){
-        if (!Pattern.matches("\\d{4}-\\d{2}-\\d{2}",bookDTO.getPublishedDate().toString())) {
+        if (!Pattern.matches("\\d{4}-\\d{2}-\\d{2}",bookDTO.getPublishedDate())) {
             return new ResponseDTO<>(false, -7, "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD", bookDTO);
         }
         return null;
@@ -48,10 +48,9 @@ public class BookValid {
         }
         return null;
     }
-    public ResponseDTO<BookDTO> validBookId(BookDTO bookDTO){
-        Integer id =bookDTO.getId();
+    public ResponseDTO<BookDTO> validBookId(Integer id){
         if (id == null || !bookRepository.existsById(id)){
-            return new ResponseDTO<>(false, -7, String.format("Berilgan bookID = %d mavjud emas", id), bookDTO);
+            return new ResponseDTO<>(false, -7, String.format("Berilgan bookID = %d mavjud emas", id), new BookDTO(id));
         }
         return null;
     }
@@ -63,7 +62,32 @@ public class BookValid {
         return new ResponseDTO<>(true, 0, "OK", bookDTO);
     }
 
-    public ResponseDTO<BookDTO> validAll(BookDTO bookDTO, Integer id){
+
+    public ResponseDTO<BookDTO> validGET(Integer id) {
+        if (id != null) {
+            ResponseDTO<BookDTO> responseDTO = validBookId(id);
+            if (responseDTO != null) return responseDTO;
+        }
+        return new ResponseDTO<>(true, 0, "OK", new BookDTO(id));
+    }
+
+    public ResponseDTO<BookDTO> validPOST(BookDTO bookDTO) {
+        ResponseDTO<BookDTO> responseDTO = validPOSTandPUT(bookDTO);
+        if (responseDTO != null) return responseDTO;
+        return new ResponseDTO<>(true, 0, "OK", bookDTO);
+    }
+
+    public ResponseDTO<BookDTO> validPUT(BookDTO bookDTO) {
+        ResponseDTO<BookDTO> responseDTO = validPOSTandPUT(bookDTO);
+        if (responseDTO != null) return responseDTO;
+        if (bookDTO.getId() != null) {
+            responseDTO = validBookId(bookDTO.getId());
+            if (responseDTO != null) return responseDTO;
+        }
+        return new ResponseDTO<>(true, 0, "OK", bookDTO);
+    }
+
+    private ResponseDTO<BookDTO> validPOSTandPUT(BookDTO bookDTO) {
         ResponseDTO<BookDTO> responseDTO = validCost(bookDTO);
         if (responseDTO != null) return responseDTO;
         responseDTO = validPublishedDate(bookDTO);
@@ -72,10 +96,12 @@ public class BookValid {
         if (responseDTO != null) return responseDTO;
         responseDTO = validAuthorId(bookDTO);
         if (responseDTO != null) return responseDTO;
-        responseDTO = validPublisherId(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        if (id != null) {
-            responseDTO = validBookId(bookDTO);
+        return validPublisherId(bookDTO);
+    }
+
+    public ResponseDTO<BookDTO> validDELETE(BookDTO bookDTO) {
+        if (bookDTO.getId() != null) {
+            ResponseDTO<BookDTO> responseDTO = validBookId(bookDTO.getId());
             if (responseDTO != null) return responseDTO;
         }
         return new ResponseDTO<>(true, 0, "OK", bookDTO);

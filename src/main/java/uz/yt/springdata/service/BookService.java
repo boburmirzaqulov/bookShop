@@ -39,74 +39,70 @@ public class BookService {
             List<BookDTO> bookDTOList = new ArrayList<>();
             for (Book book : bookPage) {
                 BookDTO bookDTO = BookMapping.toDto(book);
+
                 ResponseDTO<BookDTO> responseDTO = bookValid.validAuthorIdAndPublisherId(bookDTO);
                 if (!responseDTO.isSuccess()) return new ResponseDTO<>(false, -7, "Validatsiyada xatolik", null);
-                try {
-                    Optional<Author> optionalAuthor = authorRepository.findById(book.getAuthorId());
-                    bookDTO.setAuthorDTO(AuthorMapping.toDto(optionalAuthor.get()));
-                    try {
-                        Optional<Publisher> optionalPublisher = publisherRepository.findById(book.getPublisherId());
-                        bookDTO.setPublisherDTO(PublisherMapping.toDto(optionalPublisher.get()));
-                        bookDTOList.add(bookDTO);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return new ResponseDTO<>(false, -5, "Ma'lumot izlashda xatolik!", null);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return new ResponseDTO<>(false, -5, "Ma'lumot izlashda xatolik!", null);
-                }
+
+                bookDTO.setAuthorDTO(
+                        AuthorMapping.toDto(
+                                authorRepository.getById(
+                                        book.getAuthorId()
+                                )
+                        )
+                );
+                bookDTO.setPublisherDTO(
+                        PublisherMapping.toDto(
+                                publisherRepository.getById(
+                                        book.getPublisherId()
+                                )
+                        )
+                );
+                bookDTOList.add(bookDTO);
             }
 
             Page<BookDTO> result = new PageImpl(bookDTOList, bookPage.getPageable(), bookPage.getTotalPages());
             return new ResponseDTO<>(true, 0, "OK", result);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseDTO<>(false, -1, "ERROR", null);
+            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
         }
     }
 
 
     public ResponseDTO<BookDTO> getBook(Integer id) {
+        ResponseDTO<BookDTO> responseDTO1 = bookValid.validGET(id);
+        if (!responseDTO1.isSuccess()) return responseDTO1;
         try {
-            Optional<Book> bookOptional = bookRepository.findById(id);
-            if (!bookOptional.isPresent()) {
-                return new ResponseDTO<>(false, -7, String.format("Berilgan bookID = %d mavjud emas", id), null);
-            }
-            Book book = bookOptional.get();
+            Book book = bookRepository.getById(id);
             BookDTO bookDTO = BookMapping.toDto(book);
 
             ResponseDTO<BookDTO> responseDTO = bookValid.validAuthorIdAndPublisherId(bookDTO);
             if (!responseDTO.isSuccess()) return responseDTO;
 
-            try {
-                Optional<Author> authorOptional = authorRepository.findById(book.getAuthorId());
-                bookDTO.setAuthorDTO(AuthorMapping.toDto(authorOptional.get()));
-                try {
-                    Optional<Publisher> publisherOptional = publisherRepository.findById(book.getPublisherId());
-                    bookDTO.setPublisherDTO(PublisherMapping.toDto(publisherOptional.get()));
-                    return new ResponseDTO<>(true, 0, "OK", bookDTO);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return new ResponseDTO<>(false, -5, "Ma'lumot izlashda xatolik!", null);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new ResponseDTO<>(false, -5, "Ma'lumot izlashda xatolik!", null);
-            }
+            bookDTO.setAuthorDTO(
+                    AuthorMapping.toDto(
+                            authorRepository.getById(
+                                    book.getAuthorId()
+                            )
+                    )
+            );
+            bookDTO.setPublisherDTO(
+                    PublisherMapping.toDto(
+                            publisherRepository.getById(
+                                    book.getPublisherId()
+                            )
+                    )
+            );
+            return new ResponseDTO<>(true, 0, "OK", bookDTO);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseDTO<>(false, -1, "ERROR", null);
+            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
         }
     }
 
-    public ResponseDTO<BookDTO> addBook(BookDTO bookDTO, Integer id) {
-        ResponseDTO<BookDTO> responseDTO = bookValid.validAll(bookDTO, id);
-        if (!responseDTO.isSuccess()) return responseDTO;
-
+    public ResponseDTO<BookDTO> addAndUpdate(BookDTO bookDTO) {
         try {
             Book book = BookMapping.toEntity(bookDTO);
-            book.setId(id);
             bookDTO.setAuthorDTO(
                     AuthorMapping.toDto(
                             authorRepository.getById(
@@ -135,17 +131,24 @@ public class BookService {
         }
     }
 
+    public ResponseDTO<BookDTO> addBook(BookDTO bookDTO) {
+        ResponseDTO<BookDTO> responseDTO = bookValid.validPOST(bookDTO);
+        if (!responseDTO.isSuccess()) return responseDTO;
+        bookDTO.setId(null);
+        return addAndUpdate(bookDTO);
+    }
+
     public ResponseDTO<BookDTO> updateBook(BookDTO bookDTO) {
-        return addBook(bookDTO, bookDTO.getId());
+        ResponseDTO<BookDTO> responseDTO = bookValid.validPUT(bookDTO);
+        if (!responseDTO.isSuccess()) return responseDTO;
+        return addAndUpdate(bookDTO);
     }
 
     public ResponseDTO<BookDTO> deleteBook(BookDTO bookDTO) {
-        ResponseDTO<BookDTO> responseDTO = bookValid.validBookId(bookDTO);
-        if (responseDTO != null) {
-            return responseDTO;
-        }
-        Optional<Book> bookOptional = bookRepository.findById(bookDTO.getId());
-        Book book = bookOptional.get();
+        ResponseDTO<BookDTO> responseDTO = bookValid.validDELETE(bookDTO);
+        if (!responseDTO.isSuccess()) return responseDTO;
+
+        Book book = bookRepository.getById(bookDTO.getId());
         try {
             BookMapping.setDto(bookDTO, book);
             bookDTO.setAuthorDTO(new AuthorDTO());

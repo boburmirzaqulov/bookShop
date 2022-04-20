@@ -17,4 +17,8 @@ public class BookDTO {
     private AuthorDTO authorDTO;
     private String genre;
     private PublisherDTO publisherDTO;
+
+    public BookDTO(Integer id) {
+        this.id = id;
+    }
 }
