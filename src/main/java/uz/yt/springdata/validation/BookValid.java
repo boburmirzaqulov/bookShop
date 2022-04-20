@@ -23,8 +23,20 @@ public class BookValid {
     }
 
     public ResponseDTO<BookDTO> validPublishedDate(BookDTO bookDTO){
-        if (!Pattern.matches("\\d{4}-\\d{2}-\\d{2}",bookDTO.getPublishedDate())) {
+        String publishedDate = bookDTO.getPublishedDate();
+        if (!Pattern.matches("\\d{4}-\\d{2}-\\d{2}", publishedDate)) {
             return new ResponseDTO<>(false, -7, "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD", bookDTO);
+        }
+        String[] chapters = publishedDate.split("-");
+        Integer[] dates = new Integer[chapters.length];
+        for (int i = 0; i < chapters.length; i++) {
+            dates[i] = Integer.parseInt(chapters[i]);
+        }
+        if (dates[1] > 12 || dates[1] == 0){
+            return new ResponseDTO<>(false, -7, "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD va 1<=MM<=12", bookDTO);
+        }
+        if (dates[2] > 31 || dates[2] == 0){
+            return new ResponseDTO<>(false, -7, "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD va 01<=DD<=31", bookDTO);
         }
         return null;
     }
@@ -76,13 +88,13 @@ public class BookValid {
     }
 
     public ResponseDTO<BookDTO> validPOST(BookDTO bookDTO) {
-        ResponseDTO<BookDTO> responseDTO = validPOSTandPUT(bookDTO);
+        ResponseDTO<BookDTO> responseDTO = validPOST_and_PUT(bookDTO);
         if (responseDTO != null) return responseDTO;
         return new ResponseDTO<>(true, 0, "OK", bookDTO);
     }
 
     public ResponseDTO<BookDTO> validPUT(BookDTO bookDTO) {
-        ResponseDTO<BookDTO> responseDTO = validPOSTandPUT(bookDTO);
+        ResponseDTO<BookDTO> responseDTO = validPOST_and_PUT(bookDTO);
         if (responseDTO != null) return responseDTO;
         if (bookDTO.getId() != null) {
             responseDTO = validBookId(bookDTO.getId());
@@ -91,7 +103,7 @@ public class BookValid {
         return new ResponseDTO<>(true, 0, "OK", bookDTO);
     }
 
-    private ResponseDTO<BookDTO> validPOSTandPUT(BookDTO bookDTO) {
+    private ResponseDTO<BookDTO> validPOST_and_PUT(BookDTO bookDTO) {
         ResponseDTO<BookDTO> responseDTO = validCost(bookDTO);
         if (responseDTO != null) return responseDTO;
         responseDTO = validBookName(bookDTO);
