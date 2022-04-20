@@ -65,6 +65,7 @@ public class UserService {
     public ResponseDTO<UserDTO> addUser(UserDTO userDTO) {
         ResponseDTO<UserDTO> responseDTO = userValid.validPOST(userDTO);
         if (!responseDTO.isSuccess()) return responseDTO;
+        userDTO.setId(null);
         return addAndUpdate(userDTO);
     }
 

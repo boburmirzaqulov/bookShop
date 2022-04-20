@@ -2,10 +2,12 @@ package uz.yt.springdata.validation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import uz.yt.springdata.dao.User;
 import uz.yt.springdata.dto.ResponseDTO;
 import uz.yt.springdata.dto.UserDTO;
 import uz.yt.springdata.repository.UserRepository;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component
@@ -14,9 +16,13 @@ public class UserValid {
     private final UserRepository userRepository;
 
     public ResponseDTO<UserDTO> validUserId(UserDTO userDTO) {
-        Integer id = userDTO.getId();
-        if (id == null || !userRepository.existsById(id)) {
-            return new ResponseDTO<>(false, -7, String.format("Berilgan userID = %d mavjud emas", id), userDTO);
+        Optional<User> optionalUserDTO = userRepository.findById(userDTO.getId());
+        if (!optionalUserDTO.isPresent()) {
+            return new ResponseDTO<>(false, -7, String.format("Berilgan userID = %d mavjud emas", userDTO.getId()), userDTO);
+        }
+        String userName = optionalUserDTO.get().getUsername();
+        if (!userName.equals(userDTO.getUsername())){
+            return new ResponseDTO<>(false, -7, String.format("Berilgan userName = %s mos kelmadi", userDTO.getUsername()), userDTO);
         }
         return null;
     }
@@ -59,17 +65,17 @@ public class UserValid {
                 return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
             }
         }
-        return new ResponseDTO<>(false, -1, "Bu ID bo'yicha user mavjud emas", null);
+        return new ResponseDTO<>(false, -1, String.format("UserID = %d bo'yicha user mavjud emas",id), null);
     }
 
     public ResponseDTO<UserDTO> validPOST(UserDTO userDTO) {
         ResponseDTO<UserDTO> responseDTO = validUsername(userDTO);
         if (responseDTO != null) return responseDTO;
         responseDTO = validName(userDTO);
-        return validPOSTandPUT(userDTO, responseDTO);
+        return validPOST_and_PUT(userDTO, responseDTO);
     }
 
-    private ResponseDTO<UserDTO> validPOSTandPUT(UserDTO userDTO, ResponseDTO<UserDTO> responseDTO) {
+    private ResponseDTO<UserDTO> validPOST_and_PUT(UserDTO userDTO, ResponseDTO<UserDTO> responseDTO) {
         if (responseDTO != null) return responseDTO;
         responseDTO = validPhoneNumber(userDTO);
         if (responseDTO != null) return responseDTO;
@@ -81,8 +87,7 @@ public class UserValid {
     public ResponseDTO<UserDTO> validPUT(UserDTO userDTO) {
         ResponseDTO<UserDTO> responseDTO = validUserId(userDTO);
         if (responseDTO != null) return responseDTO;
-        responseDTO = validUsername(userDTO);
-        return validPOSTandPUT(userDTO, responseDTO);
+        return validPOST_and_PUT(userDTO, null);
     }
 
     public ResponseDTO<UserDTO> validDELETE(UserDTO userDTO) {
