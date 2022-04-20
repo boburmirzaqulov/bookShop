@@ -54,6 +54,10 @@ public class BookValid {
         }
         return null;
     }
+    public ResponseDTO<BookDTO> validBookName(BookDTO bookDTO){
+        if (bookDTO.getName().isEmpty()) return new ResponseDTO<>(false, -7, "Kitobning nomi mavjud emas", bookDTO);
+        return null;
+    }
     public ResponseDTO<BookDTO> validAuthorIdAndPublisherId(BookDTO bookDTO){
         ResponseDTO<BookDTO> responseDTO = validAuthorId(bookDTO);
         if (responseDTO != null) return responseDTO;
@@ -89,6 +93,8 @@ public class BookValid {
 
     private ResponseDTO<BookDTO> validPOSTandPUT(BookDTO bookDTO) {
         ResponseDTO<BookDTO> responseDTO = validCost(bookDTO);
+        if (responseDTO != null) return responseDTO;
+        responseDTO = validBookName(bookDTO);
         if (responseDTO != null) return responseDTO;
         responseDTO = validPublishedDate(bookDTO);
         if (responseDTO != null) return responseDTO;
