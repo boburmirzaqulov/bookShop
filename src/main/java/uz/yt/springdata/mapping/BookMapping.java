@@ -30,9 +30,9 @@ public class BookMapping {
                 bookDTO.getCost(),
                 Date.valueOf(bookDTO.getPublishedDate()),
                 bookDTO.getPageCount(),
-                bookDTO.getAuthorDTO().getId(),
+                bookDTO.getAuthor().getId(),
                 bookDTO.getGenre(),
-                bookDTO.getPublisherDTO().getId()
+                bookDTO.getPublisher().getId()
         );
     }
 

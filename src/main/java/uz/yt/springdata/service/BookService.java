@@ -40,14 +40,14 @@ public class BookService {
                 ResponseDTO<BookDTO> responseDTO = bookValid.validAuthorIdAndPublisherId(bookDTO);
                 if (!responseDTO.isSuccess()) return new ResponseDTO<>(false, -7, "Validatsiyada xatolik", null);
 
-                bookDTO.setAuthorDTO(
+                bookDTO.setAuthor(
                         AuthorMapping.toDto(
                                 authorRepository.getById(
                                         book.getAuthorId()
                                 )
                         )
                 );
-                bookDTO.setPublisherDTO(
+                bookDTO.setPublisher(
                         PublisherMapping.toDto(
                                 publisherRepository.getById(
                                         book.getPublisherId()
@@ -76,14 +76,14 @@ public class BookService {
             ResponseDTO<BookDTO> responseDTO = bookValid.validAuthorIdAndPublisherId(bookDTO);
             if (!responseDTO.isSuccess()) return responseDTO;
 
-            bookDTO.setAuthorDTO(
+            bookDTO.setAuthor(
                     AuthorMapping.toDto(
                             authorRepository.getById(
                                     book.getAuthorId()
                             )
                     )
             );
-            bookDTO.setPublisherDTO(
+            bookDTO.setPublisher(
                     PublisherMapping.toDto(
                             publisherRepository.getById(
                                     book.getPublisherId()
@@ -100,14 +100,14 @@ public class BookService {
     public ResponseDTO<BookDTO> addAndUpdate(BookDTO bookDTO) {
         try {
             Book book = BookMapping.toEntity(bookDTO);
-            bookDTO.setAuthorDTO(
+            bookDTO.setAuthor(
                     AuthorMapping.toDto(
                             authorRepository.getById(
                                     book.getAuthorId()
                             )
                     )
             );
-            bookDTO.setPublisherDTO(
+            bookDTO.setPublisher(
                     PublisherMapping.toDto(
                             publisherRepository.getById(
                                     book.getPublisherId()
@@ -148,10 +148,10 @@ public class BookService {
         Book book = bookRepository.getById(bookDTO.getId());
         try {
             BookMapping.setDto(bookDTO, book);
-            bookDTO.setAuthorDTO(new AuthorDTO());
-            bookDTO.getAuthorDTO().setId(book.getAuthorId());
-            bookDTO.setPublisherDTO(new PublisherDTO());
-            bookDTO.getPublisherDTO().setId(book.getPublisherId());
+            bookDTO.setAuthor(new AuthorDTO());
+            bookDTO.getAuthor().setId(book.getAuthorId());
+            bookDTO.setPublisher(new PublisherDTO());
+            bookDTO.getPublisher().setId(book.getPublisherId());
             bookRepository.delete(book);
             return new ResponseDTO<>(true, 0, "OK", bookDTO);
         } catch (Exception e) {

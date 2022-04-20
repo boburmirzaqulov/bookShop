@@ -35,14 +35,14 @@ public class BookValid {
         return null;
     }
     public ResponseDTO<BookDTO> validAuthorId(BookDTO bookDTO){
-        Integer id = bookDTO.getAuthorDTO().getId();
+        Integer id = bookDTO.getAuthor().getId();
         if (id == null || !authorService.existsById(id)) {
             return new ResponseDTO<>(false, -7, String.format("Berilgan authorID = %d mavjud emas", id), bookDTO);
         }
         return null;
     }
     public ResponseDTO<BookDTO> validPublisherId(BookDTO bookDTO){
-        Integer id = bookDTO.getPublisherDTO().getId();
+        Integer id = bookDTO.getPublisher().getId();
         if (id == null || !publisherService.existsById(id)) {
             return new ResponseDTO<>(false, -7, String.format("Berilgan publisherID = %d mavjud emas", id), bookDTO);
         }
