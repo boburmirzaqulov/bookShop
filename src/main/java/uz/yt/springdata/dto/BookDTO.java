@@ -14,9 +14,9 @@ public class BookDTO {
     private BigDecimal cost;
     private String publishedDate;
     private Integer pageCount;
-    private AuthorDTO authorDTO;
+    private AuthorDTO author;
     private String genre;
-    private PublisherDTO publisherDTO;
+    private PublisherDTO publisher;
 
     public BookDTO(Integer id) {
         this.id = id;

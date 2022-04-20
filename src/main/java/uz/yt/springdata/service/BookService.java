@@ -5,9 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import uz.yt.springdata.dao.Author;
 import uz.yt.springdata.dao.Book;
-import uz.yt.springdata.dao.Publisher;
 import uz.yt.springdata.dto.AuthorDTO;
 import uz.yt.springdata.dto.BookDTO;
 import uz.yt.springdata.dto.PublisherDTO;
@@ -22,7 +20,6 @@ import uz.yt.springdata.validation.BookValid;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
