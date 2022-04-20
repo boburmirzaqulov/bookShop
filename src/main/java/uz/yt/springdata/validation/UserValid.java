@@ -2,7 +2,6 @@ package uz.yt.springdata.validation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import uz.yt.springdata.dto.BookDTO;
 import uz.yt.springdata.dto.ResponseDTO;
 import uz.yt.springdata.dto.UserDTO;
 import uz.yt.springdata.repository.UserRepository;
