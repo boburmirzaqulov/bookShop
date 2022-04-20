@@ -107,31 +107,31 @@ public class BookService {
         try {
             Book book = BookMapping.toEntity(bookDTO);
             book.setId(id);
+            bookDTO.setAuthorDTO(
+                    AuthorMapping.toDto(
+                            authorRepository.getById(
+                                    book.getAuthorId()
+                            )
+                    )
+            );
+            bookDTO.setPublisherDTO(
+                    PublisherMapping.toDto(
+                            publisherRepository.getById(
+                                    book.getPublisherId()
+                            )
+                    )
+            );
             try {
-                Optional<Author> authorOptional = authorRepository.findById(book.getAuthorId());
-                bookDTO.setAuthorDTO(AuthorMapping.toDto(authorOptional.get()));
-                try {
-                    Optional<Publisher> publisherOptional = publisherRepository.findById(book.getPublisherId());
-                    bookDTO.setPublisherDTO(PublisherMapping.toDto(publisherOptional.get()));
-                    try {
-                        bookRepository.save(book);
-                        BookMapping.setDto(bookDTO, book);
-                        return new ResponseDTO<>(true, 0, "OK", bookDTO);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return new ResponseDTO<>(false, -3, "Ma'lumot saqlashda xatolik!", bookDTO);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return new ResponseDTO<>(false, -5, "Ma'lumot izlashda xatolik!", bookDTO);
-                }
+                bookRepository.save(book);
+                BookMapping.setDto(bookDTO, book);
+                return new ResponseDTO<>(true, 0, "OK", bookDTO);
             } catch (Exception e) {
                 e.printStackTrace();
-                return new ResponseDTO<>(false, -5, "Ma'lumot izlashda xatolik!", bookDTO);
+                return new ResponseDTO<>(false, -3, "Ma'lumot saqlashda xatolik!", bookDTO);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseDTO<>(false, -5, "Ma'lumot izlashda xatolik!", bookDTO);
+            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", bookDTO);
         }
     }
 

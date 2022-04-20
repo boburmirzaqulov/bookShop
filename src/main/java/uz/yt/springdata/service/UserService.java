@@ -34,45 +34,50 @@ public class UserService {
             return new ResponseDTO<>(true, 0, "OK", result);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseDTO<>(false, -1, "ERROR", null);
+            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
         }
     }
 
     public ResponseDTO<UserDTO> getUser(Integer id) {
+        ResponseDTO<UserDTO> responseDTO = userValid.validGET(id);
+        if (!responseDTO.isSuccess()) return responseDTO;
         try {
-            Optional<User> userOptional = userRepository.findById(id);
-            return userOptional.map(
-                            user -> new ResponseDTO<>(true, 0, "OK", UserMapping.toDto(user)))
-                    .orElseGet(() -> new ResponseDTO<>(false, -2, String.format("ID = %d bo'yicha User topilmadi", id), null));
+            User user = userRepository.getById(id);
+            return new ResponseDTO<>(true, 0, "OK", UserMapping.toDto(user));
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseDTO<>(false, -1, "ERROR", null);
+            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
         }
     }
 
-    public ResponseDTO<UserDTO> addUser(UserDTO userDTO, Integer id) {
-        ResponseDTO<UserDTO> responseDTO = userValid.validAll(userDTO, id);
+    public ResponseDTO<UserDTO> addAndUpdate(UserDTO userDTO){
+        try {
+            User user = UserMapping.toEntity(userDTO);
+            userRepository.save(user);
+            UserMapping.setDto(userDTO, user);
+            return new ResponseDTO<>(true, 0, "OK", userDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseDTO<>(false, -3, "Ma'lumot saqlashda xatolik!", userDTO);
+        }
+    }
+
+    public ResponseDTO<UserDTO> addUser(UserDTO userDTO) {
+        ResponseDTO<UserDTO> responseDTO = userValid.validPOST(userDTO);
         if (!responseDTO.isSuccess()) return responseDTO;
-            try {
-                User user = UserMapping.toEntity(userDTO);
-                userRepository.save(user);
-                UserMapping.setDto(userDTO, user);
-                return new ResponseDTO<>(true, 0, "OK", userDTO);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new ResponseDTO<>(false, -3, "Ma'lumot saqlashda xatolik!", userDTO);
-            }
+        return addAndUpdate(userDTO);
     }
 
     public ResponseDTO<UserDTO> updateUser(UserDTO userDTO) {
-        return addUser(userDTO, userDTO.getId());
+        ResponseDTO<UserDTO> responseDTO = userValid.validPUT(userDTO);
+        if (!responseDTO.isSuccess()) return responseDTO;
+        return addAndUpdate(userDTO);
     }
 
+
     public ResponseDTO<UserDTO> deleteUser(UserDTO userDTO) {
-        ResponseDTO<UserDTO> responseDTO = userValid.validUserId(userDTO);
-        if (responseDTO != null) {
-            return responseDTO;
-        }
+        ResponseDTO<UserDTO> responseDTO = userValid.validDELETE(userDTO);
+        if (!responseDTO.isSuccess()) return responseDTO;
         Optional<User> userOptional = userRepository.findById(userDTO.getId());
         User user = userOptional.get();
         UserMapping.setDto(userDTO, user);

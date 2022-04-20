@@ -24,7 +24,7 @@ public class UserResource {
 
     @PostMapping("/user")
     public ResponseDTO<UserDTO> addUser(@RequestBody UserDTO userDTO){
-        return userService.addUser(userDTO, null);
+        return userService.addUser(userDTO);
     }
 
     @PutMapping("/user")
