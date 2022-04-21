@@ -12,9 +12,7 @@ import uz.yt.springdata.mapping.UserMapping;
 import uz.yt.springdata.repository.UserRepository;
 import uz.yt.springdata.validation.UserValid;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,22 +29,24 @@ public class UserService {
                 userDTOList.add(UserMapping.toDto(user));
             }
             Page<UserDTO> result = new PageImpl(userDTOList, userList.getPageable(), userList.getTotalPages());
-            return new ResponseDTO<>(true, 0, "OK", result);
+            return new ResponseDTO<>(true, 0, "OK", result, null);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
+            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null, null);
         }
     }
 
     public ResponseDTO<UserDTO> getUser(Integer id) {
-        ResponseDTO<UserDTO> responseDTO = userValid.validGET(id);
-        if (!responseDTO.isSuccess()) return responseDTO;
         try {
-            User user = userRepository.getById(id);
-            return new ResponseDTO<>(true, 0, "OK", UserMapping.toDto(user));
+            Optional<User> userOptional = userRepository.findById(id);
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                return new ResponseDTO<>(true, 0, "OK", UserMapping.toDto(user), null);
+            }
+            return new ResponseDTO<>(false, -1, String.format("UserId = %d bo'yicha ma'lumot topilmadi", id), new UserDTO(id), null);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
+            return new ResponseDTO<>(false, -2, "Ma'lumot izlashda xatolik mavjud", new UserDTO(id), null);
         }
     }
 
@@ -63,22 +63,29 @@ public class UserService {
     }
 
     public ResponseDTO<UserDTO> addUser(UserDTO userDTO) {
-        ResponseDTO<UserDTO> responseDTO = userValid.validPOST(userDTO);
-        if (!responseDTO.isSuccess()) return responseDTO;
+        Map<String, String> errors = userValid.validPOST(userDTO);
+        if (errors.size()>0) return new ResponseDTO<>(false, -1, "Validatsiyada xatolik", userDTO, errors);
         userDTO.setId(null);
         return addAndUpdate(userDTO);
     }
 
     public ResponseDTO<UserDTO> updateUser(UserDTO userDTO) {
-        ResponseDTO<UserDTO> responseDTO = userValid.validPUT(userDTO);
-        if (!responseDTO.isSuccess()) return responseDTO;
+        Map<String, String> errors = validUserId(userDTO);
+        if (errors.size()>0) return new ResponseDTO<>(false, -1, "Validatsiyada xatolik", userDTO, errors);
+        userValid.validPUT(userDTO, errors);
+        if (errors.size()>0) return new ResponseDTO<>(false, -1, "Validatsiyada xatolik", userDTO, errors);
+
         return addAndUpdate(userDTO);
+    }
+
+    private Map<String, String> validUserId(UserDTO userDTO) {
+        return null;
     }
 
 
     public ResponseDTO<UserDTO> deleteUser(UserDTO userDTO) {
-        ResponseDTO<UserDTO> responseDTO = userValid.validDELETE(userDTO);
-        if (!responseDTO.isSuccess()) return responseDTO;
+        Map<String, String> errors = userValid.validDELETE(userDTO);
+        if (errors.size()>0) return new ResponseDTO<>(false, -1, "Validatsiyada xatolik", userDTO, errors);
         Optional<User> userOptional = userRepository.findById(userDTO.getId());
         User user = userOptional.get();
         UserMapping.setDto(userDTO, user);

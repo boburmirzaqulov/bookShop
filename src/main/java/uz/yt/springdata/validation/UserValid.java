@@ -7,6 +7,8 @@ import uz.yt.springdata.dto.ResponseDTO;
 import uz.yt.springdata.dto.UserDTO;
 import uz.yt.springdata.repository.UserRepository;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -27,67 +29,74 @@ public class UserValid {
         return null;
     }
 
-    public ResponseDTO<UserDTO> validName(UserDTO userDTO) {
-        if (userDTO.getFirstName() == null && userDTO.getLastName() == null) {
-            return new ResponseDTO<>(false, -7, "Firstname va Lastname mavjud emas. Hech bo'lmasa bittasini kiriting", userDTO);
+    public void validFirstName(UserDTO userDTO, Map<String, String> errors) {
+        String firstName = userDTO.getFirstName();
+        if (firstName==null){
+            errors.put("firstName", "FirstName null bo'lishi mumkinmas");
+            return;
         }
-        return null;
+        if (firstName.isEmpty()){
+            errors.put("firstName", "FirstName bo'sh bo'lishi mumkinmas");
+        }
     }
 
-    public ResponseDTO<UserDTO> validPhoneNumber(UserDTO userDTO) {
+    public void validPhoneNumber(UserDTO userDTO, Map<String, String> errors) {
         if (userDTO.getPhoneNumber() != null && !Pattern.matches("[+]\\d{3} \\d{2} \\d{3} \\d{2} \\d{2}", userDTO.getPhoneNumber())) {
-            return new ResponseDTO<>(false, -7, "Telefon nomer formati mos kelmadi. To'g'ri format +998 XX XXX XX XX", userDTO);
+            errors.put("phoneNumber", "Telefon nomer formati mos kelmadi. To'g'ri format +998 XX XXX XX XX");
         }
-        return null;
     }
 
-    public ResponseDTO<UserDTO> validAccount(UserDTO userDTO) {
+    public void validAccount(UserDTO userDTO, Map<String, String> errors) {
         if (userDTO.getAccount().intValue() < 0)
-            return new ResponseDTO<>(false, -7, "User hisob raqami manfiy son bo'lishi mumkinmas", userDTO);
-        return null;
+            errors.put("account", "User hisob raqami manfiy son bo'lishi mumkinmas");
     }
 
-    public ResponseDTO<UserDTO> validUsername(UserDTO userDTO) {
+    public void validUsername(UserDTO userDTO, Map<String, String> errors) {
         if (userRepository.existsByUsername(userDTO.getUsername())) {
-            return new ResponseDTO<>(false, -7, String.format("USERNAME = %s foydalanuvchi mavjud", userDTO.getUsername()), userDTO);
+            errors.put("userName", String.format("USERNAME = %s foydalanuvchi mavjud", userDTO.getUsername()));
         }
-        return null;
     }
 
-    public ResponseDTO<UserDTO> validGET(Integer id) {
-        if (id != null) {
-            try {
-                if (userRepository.existsById(id)) {
-                    return new ResponseDTO<>(true, 0, "OK", new UserDTO());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null);
-            }
+    public Map<String, String> validPOST(UserDTO userDTO) {
+        Map<String, String> errors = new HashMap<>();
+        validUsername(userDTO, errors);
+        if (errors.size()>0) return errors;
+        validPostAndPut(userDTO, errors);
+        return errors;
+    }
+
+    private void validLastName(UserDTO userDTO, Map<String, String> errors) {
+        String lastName = userDTO.getLastName();
+        if (lastName==null){
+            errors.put("firstName", "FirstName null bo'lishi mumkinmas");
+            return;
         }
-        return new ResponseDTO<>(false, -1, String.format("UserID = %d bo'yicha user mavjud emas",id), null);
+        if (lastName.isEmpty()){
+            errors.put("firstName", "FirstName bo'sh bo'lishi mumkinmas");
+        }
     }
 
-    public ResponseDTO<UserDTO> validPOST(UserDTO userDTO) {
-        ResponseDTO<UserDTO> responseDTO = validUsername(userDTO);
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validName(userDTO);
-        return validPOST_and_PUT(userDTO, responseDTO);
+    private void validPostAndPut(UserDTO userDTO, Map<String, String> errors) {
+        validFirstName(userDTO, errors);
+        validLastName(userDTO, errors);
+        validPhoneNumber(userDTO, errors);
+        validAccount(userDTO, errors);
+        validPassword(userDTO, errors);
     }
 
-    private ResponseDTO<UserDTO> validPOST_and_PUT(UserDTO userDTO, ResponseDTO<UserDTO> responseDTO) {
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validPhoneNumber(userDTO);
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validAccount(userDTO);
-        if (responseDTO != null) return responseDTO;
-        return new ResponseDTO<>(true, 0, "OK", userDTO);
+    private void validPassword(UserDTO userDTO, Map<String, String> errors) {
+        String password = userDTO.getPassword();
+        if (password == null) {
+            errors.put("password", "Password null bo'lishi mumkinmas");
+            return;
+        }
+        if (password.isEmpty()){
+            errors.put("password", "Pssword bo'sh bo'lishi mumkinmas");
+        }
     }
 
-    public ResponseDTO<UserDTO> validPUT(UserDTO userDTO) {
-        ResponseDTO<UserDTO> responseDTO = validUserId(userDTO);
-        if (responseDTO != null) return responseDTO;
-        return validPOST_and_PUT(userDTO, null);
+    public void validPUT(UserDTO userDTO, Map<String, String> errors) {
+        validPostAndPut(userDTO, errors);
     }
 
     public ResponseDTO<UserDTO> validDELETE(UserDTO userDTO) {

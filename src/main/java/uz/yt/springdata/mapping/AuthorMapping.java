@@ -7,6 +7,7 @@ import java.sql.Date;
 
 public class AuthorMapping {
     public static AuthorDTO toDto(Author author){
+        if (author==null) return null;
         return new AuthorDTO(
                 author.getId(),
                 author.getFirstName(),
@@ -16,6 +17,7 @@ public class AuthorMapping {
     }
 
     public static Author toEntity(AuthorDTO authorDTO){
+        if (authorDTO==null) return null;
         return new Author(
                 authorDTO.getId(),
                 authorDTO.getFirstName(),

@@ -1,39 +1,13 @@
 package uz.yt.springdata.mapping;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import uz.yt.springdata.dao.Book;
 import uz.yt.springdata.dto.AuthorDTO;
 import uz.yt.springdata.dto.BookDTO;
 import uz.yt.springdata.dto.PublisherDTO;
-import uz.yt.springdata.repository.AuthorRepository;
-import uz.yt.springdata.repository.PublisherRepository;
 
 import java.sql.Date;
 
-@Component
-@RequiredArgsConstructor
 public class BookMapping {
-    private final AuthorRepository authorRepository;
-    private final PublisherRepository publisherRepository;
-
-    public void bookToBookDto(BookDTO bookDTO){
-        Book book = BookMapping.toEntity(bookDTO);
-        bookDTO.setAuthor(
-                AuthorMapping.toDto(
-                        authorRepository.getById(
-                                book.getAuthorId()
-                        )
-                )
-        );
-        bookDTO.setPublisher(
-                PublisherMapping.toDto(
-                        publisherRepository.getById(
-                                book.getPublisherId()
-                        )
-                )
-        );
-    }
 
     public static BookDTO toDto(Book book){
 

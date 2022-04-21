@@ -17,4 +17,8 @@ public class UserDTO {
     private BigDecimal account;
     private String username;
     private String password;
+
+    public UserDTO(Integer id) {
+        this.id = id;
+    }
 }

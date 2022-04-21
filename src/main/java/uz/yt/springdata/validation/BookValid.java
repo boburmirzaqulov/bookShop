@@ -3,10 +3,12 @@ package uz.yt.springdata.validation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import uz.yt.springdata.dto.BookDTO;
-import uz.yt.springdata.dto.ResponseDTO;
 import uz.yt.springdata.repository.BookRepository;
 import uz.yt.springdata.service.AuthorService;
 import uz.yt.springdata.service.PublisherService;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Component
@@ -16,112 +18,88 @@ public class BookValid {
     private final AuthorService authorService;
     private final PublisherService publisherService;
 
-    public ResponseDTO<BookDTO> validCost(BookDTO bookDTO){
-        if (bookDTO.getCost().intValue() < 0)
-            return new ResponseDTO<>(false, -7, "Kitob narxi manfiy son bo'lishi mumkinmas", bookDTO);
-        return null;
+    public void validCost(BookDTO bookDTO, Map<String, String> errors) {
+        if (bookDTO.getCost().intValue() < 0) {
+            errors.put("cost", "Kitob narxi manfiy son bo'lishi mumkinmas");
+        }
     }
 
-    public ResponseDTO<BookDTO> validPublishedDate(BookDTO bookDTO){
+    public void validPublishedDate(BookDTO bookDTO, Map<String, String> errors) {
         String publishedDate = bookDTO.getPublishedDate();
         if (!Pattern.matches("\\d{4}-\\d{2}-\\d{2}", publishedDate)) {
-            return new ResponseDTO<>(false, -7, "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD", bookDTO);
+            errors.put("publishedDate", "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD");
+            return;
         }
         String[] chapters = publishedDate.split("-");
         Integer[] dates = new Integer[chapters.length];
         for (int i = 0; i < chapters.length; i++) {
             dates[i] = Integer.parseInt(chapters[i]);
         }
-        if (dates[1] > 12 || dates[1] == 0){
-            return new ResponseDTO<>(false, -7, "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD va 1<=MM<=12", bookDTO);
+        if (dates[1] > 12 || dates[1] == 0) {
+            errors.put("publishedDate", "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD va 1<=MM<=12");
         }
-        if (dates[2] > 31 || dates[2] == 0){
-            return new ResponseDTO<>(false, -7, "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD va 01<=DD<=31", bookDTO);
+        if (dates[2] > 31 || dates[2] == 0) {
+            errors.put("publishedDate", "Sana formati mos kelmadi. To'g'ri format YYYY-MM-DD va 01<=DD<=31");
         }
-        return null;
     }
-    public ResponseDTO<BookDTO> validPageCount(BookDTO bookDTO){
-        if (bookDTO.getPageCount()<0){
-            return new ResponseDTO<>(false, -7, "Kitob betlari soni manfiy bo'lishi mumkinmas", bookDTO);
+
+    public void validPageCount(BookDTO bookDTO, Map<String, String> errors) {
+        if (bookDTO.getPageCount() < 0) {
+            errors.put("pageCoount", "Kitob betlari soni manfiy bo'lishi mumkinmas");
         }
-        return null;
     }
-    public ResponseDTO<BookDTO> validAuthorId(BookDTO bookDTO){
+
+    public void validAuthorId(BookDTO bookDTO, Map<String, String> errors) {
         Integer id = bookDTO.getAuthor().getId();
         if (id == null || !authorService.existsById(id)) {
-            return new ResponseDTO<>(false, -7, String.format("Berilgan authorID = %d mavjud emas", id), bookDTO);
+            errors.put("authorId", String.format("Berilgan authorID = %d mavjud emas", id));
         }
-        return null;
     }
-    public ResponseDTO<BookDTO> validPublisherId(BookDTO bookDTO){
+
+    public void validPublisherId(BookDTO bookDTO, Map<String, String> errors) {
         Integer id = bookDTO.getPublisher().getId();
         if (id == null || !publisherService.existsById(id)) {
-            return new ResponseDTO<>(false, -7, String.format("Berilgan publisherID = %d mavjud emas", id), bookDTO);
+            errors.put("publisherId", String.format("Berilgan publisherID = %d mavjud emas", id));
         }
-        return null;
     }
-    public ResponseDTO<BookDTO> validBookId(Integer id){
-        if (id == null || !bookRepository.existsById(id)){
-            return new ResponseDTO<>(false, -7, String.format("Berilgan bookID = %d mavjud emas", id), new BookDTO(id));
+
+    public void validBookId(BookDTO bookDTO, Map<String, String> errors) {
+        Integer id = bookDTO.getId();
+        if (id == null || !bookRepository.existsById(id)) {
+            errors.put("bookId", String.format("Berilgan bookID = %d mavjud emas", id));
         }
-        return null;
-    }
-    public ResponseDTO<BookDTO> validBookName(BookDTO bookDTO){
-        if (bookDTO.getName().isEmpty()) return new ResponseDTO<>(false, -7, "Kitobning nomi mavjud emas", bookDTO);
-        return null;
-    }
-    public ResponseDTO<BookDTO> validAuthorIdAndPublisherId(BookDTO bookDTO){
-        ResponseDTO<BookDTO> responseDTO = validAuthorId(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validPublisherId(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        return new ResponseDTO<>(true, 0, "OK", bookDTO);
     }
 
-
-    public ResponseDTO<BookDTO> validGET(Integer id) {
-        if (id != null) {
-            ResponseDTO<BookDTO> responseDTO = validBookId(id);
-            if (responseDTO != null) return responseDTO;
+    public void validBookName(BookDTO bookDTO, Map<String, String> errors) {
+        String bookName = bookDTO.getName();
+        if (bookName != null) {
+            if (bookName.isEmpty()) {
+                errors.put("bookName", "Kitobning nomi mavjud emas");
+            }
         }
-        return new ResponseDTO<>(true, 0, "OK", new BookDTO(id));
+        errors.put("bookName", "Kitobning nomi mavjud emas");
     }
 
-    public ResponseDTO<BookDTO> validPOST(BookDTO bookDTO) {
-        ResponseDTO<BookDTO> responseDTO = validPOST_and_PUT(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        return new ResponseDTO<>(true, 0, "OK", bookDTO);
+    public Map<String, String> validPost(BookDTO bookDTO) {
+        Map<String, String> errors = new HashMap<>();
+        validPostAndPut(bookDTO, errors);
+        return errors;
     }
 
-    public ResponseDTO<BookDTO> validPUT(BookDTO bookDTO) {
-        ResponseDTO<BookDTO> responseDTO = validPOST_and_PUT(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        if (bookDTO.getId() != null) {
-            responseDTO = validBookId(bookDTO.getId());
-            if (responseDTO != null) return responseDTO;
-        }
-        return new ResponseDTO<>(true, 0, "OK", bookDTO);
+    public Map<String, String> validPut(BookDTO bookDTO) {
+        Map<String, String> errors = new HashMap<>();
+        validBookId(bookDTO, errors);
+        if (errors.size()>0) return errors;
+        validPostAndPut(bookDTO, errors);
+        return errors;
     }
 
-    private ResponseDTO<BookDTO> validPOST_and_PUT(BookDTO bookDTO) {
-        ResponseDTO<BookDTO> responseDTO = validCost(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validBookName(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validPublishedDate(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validPageCount(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        responseDTO = validAuthorId(bookDTO);
-        if (responseDTO != null) return responseDTO;
-        return validPublisherId(bookDTO);
-    }
-
-    public ResponseDTO<BookDTO> validDELETE(BookDTO bookDTO) {
-        if (bookDTO.getId() != null) {
-            ResponseDTO<BookDTO> responseDTO = validBookId(bookDTO.getId());
-            if (responseDTO != null) return responseDTO;
-        }
-        return new ResponseDTO<>(true, 0, "OK", bookDTO);
+    private void validPostAndPut(BookDTO bookDTO, Map<String, String> errors) {
+        validCost(bookDTO, errors);
+        validBookName(bookDTO, errors);
+        validPublishedDate(bookDTO, errors);
+        validPageCount(bookDTO, errors);
+        validAuthorId(bookDTO, errors);
+        validPublisherId(bookDTO, errors);
     }
 }
