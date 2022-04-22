@@ -5,20 +5,18 @@ import uz.yt.springdata.dto.PublisherDTO;
 
 public class PublisherMapping {
     public static PublisherDTO toDto(Publisher publisher){
-        if (publisher==null) return null;
-        return new PublisherDTO(
+        return publisher == null ? null : new PublisherDTO(
                 publisher.getId(),
                 publisher.getName(),
-                publisher.getAddressId()
+                AddressMapping.toDto(publisher.getAddress())
         );
     }
 
     public static Publisher toEntity(PublisherDTO publisherDTO){
-        if (publisherDTO==null) return null;
-        return new Publisher(
+        return publisherDTO == null ? null : new Publisher(
                 publisherDTO.getId(),
                 publisherDTO.getName(),
-                publisherDTO.getAddressId()
+                AddressMapping.toEntity(publisherDTO.getAddress())
         );
     }
 }

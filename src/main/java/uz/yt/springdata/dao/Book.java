@@ -16,23 +16,31 @@ import java.sql.Date;
 @NoArgsConstructor
 public class Book {
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "book_id_seq")
+    @SequenceGenerator(name = "book_id_seq", sequenceName = "books_id_seq", allocationSize = 1)
     private Integer id;
+
     @Column(name = "nameuz")
     private String nameUz;
+
     @Column(name = "nameru")
     private String nameRu;
-    @Column(name = "cost")
+
     private BigDecimal cost;
+
     @Column(name = "publisheddate")
     private Date publishedDate;
+
     @Column(name = "pagecount")
     private Integer pageCount;
-    @Column(name = "authorid")
-    private Integer authorId;
-    @Column(name = "genre")
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "authorid")
+    private Author author;
+
     private String genre;
-    @Column(name = "publisherid")
-    private Integer publisherId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "publisherid")
+    private Publisher publisher;
 }

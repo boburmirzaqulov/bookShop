@@ -14,13 +14,16 @@ import java.sql.Date;
 @NoArgsConstructor
 public class Author {
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "author_id_seq")
+    @SequenceGenerator(name = "author_id_seq", sequenceName = "authors_id_seq", allocationSize = 1)
     private Integer id;
+
     @Column(name = "firstname")
     private String firstName;
+
     @Column(name = "lastname")
     private String lastName;
+
     @Column(name = "birthdate")
     private Date birthDate;
 }

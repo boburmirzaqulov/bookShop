@@ -14,19 +14,23 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class User {
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "user_id_seq")
+    @SequenceGenerator(name = "user_id_seq", sequenceName = "users_id_seq", allocationSize = 1)
     private Integer id;
+
     @Column(name = "firstname")
     private String firstName;
+
     @Column(name = "lastname")
     private String lastName;
+
     @Column(name = "phonenumber")
     private String phoneNumber;
-    @Column(name = "account")
+
     private BigDecimal account;
+
     @Column(name = "username", unique = true)
     private String username;
-    @Column(name = "password")
+
     private String password;
 }

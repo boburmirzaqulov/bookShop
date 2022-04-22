@@ -7,12 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PublisherDTO {
+public class AddressDTO {
     private Integer id;
-    private String name;
-    private AddressDTO address;
-
-    public PublisherDTO(Integer id) {
-        this.id = id;
-    }
+    private Integer regionId;
+    private Integer districtId;
+    private String street;
+    private String homeNumber;
+    private String orient;
 }

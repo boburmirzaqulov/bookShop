@@ -13,6 +13,7 @@ import uz.yt.springdata.repository.UserRepository;
 import uz.yt.springdata.validation.UserValid;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +24,10 @@ public class UserService {
     public ResponseDTO<Page<UserDTO>> getAllUsers(Integer size, Integer page) {
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
-            Page<User> userList = userRepository.findAll(pageRequest);
-            List<UserDTO> userDTOList = new ArrayList<>();
-            for (User user : userList) {
-                userDTOList.add(UserMapping.toDto(user));
-            }
-            Page<UserDTO> result = new PageImpl(userDTOList, userList.getPageable(), userList.getTotalPages());
-            return new ResponseDTO<>(true, 0, "OK", result, null);
+            Page<User> result = userRepository.findAll(pageRequest);
+            List<UserDTO> list = result.stream().map(UserMapping::toDto).collect(Collectors.toList());
+            Page<UserDTO> response = new PageImpl<>(list, result.getPageable(), result.getTotalPages());
+            return new ResponseDTO<>(true, 0, "OK", response, null);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseDTO<>(false, -2, "Ma'lumot qidirishda xatolik mavjud", null, null);

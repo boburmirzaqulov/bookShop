@@ -13,12 +13,15 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class Publisher {
     @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "publisher_id_seq")
+    @SequenceGenerator(name = "publisher_id_seq", sequenceName = "publisher_id_seq", allocationSize = 1)
     private Integer id;
+
     @Column(name = "name")
     private String name;
-    @Column(name = "addressid")
-    private Integer addressId;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "addressid")
+    private Address address;
 
 }
