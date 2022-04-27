@@ -6,7 +6,6 @@ import uz.yt.springdata.dto.CourseDTO;
 import uz.yt.springdata.dto.StudentDTO;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CourseMapping {
