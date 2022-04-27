@@ -28,7 +28,10 @@ public class AuthorService {
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<Author> authorPage = authorRepository.findAll(pageRequest);
-            List<AuthorDTO> authors = authorPage.stream().map(e -> AuthorMapping.toDto(e, e.getBooks())).collect(Collectors.toList());
+            List<AuthorDTO> authors = authorPage
+                    .stream()
+                    .map(e -> AuthorMapping.toDto(e, e.getBooks()))
+                    .collect(Collectors.toList());
             Page<AuthorDTO> result = new PageImpl<>(authors, authorPage.getPageable(), authorPage.getTotalPages());
             return new ResponseDTO<>(true, 0, "OK", result, null);
         } catch (Exception e){

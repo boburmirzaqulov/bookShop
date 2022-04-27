@@ -19,6 +19,7 @@ import uz.yt.springdata.repository.PublisherRepository;
 import uz.yt.springdata.validation.BookValid;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,11 +33,10 @@ public class BookService {
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<Book> bookPage = bookRepository.findAll(pageRequest);
-            List<BookDTO> bookDTOList = new ArrayList<>();
-            for (Book book : bookPage) {
-                BookDTO bookDTO = BookMapping.toDto(book, book.getAuthor(), book.getPublisher());
-                bookDTOList.add(bookDTO);
-            }
+            List<BookDTO> bookDTOList = bookPage
+                    .stream()
+                    .map(e -> BookMapping.toDto(e, e.getAuthor(), e.getPublisher()))
+                    .collect(Collectors.toList());
             Page<BookDTO> result = new PageImpl<>(bookDTOList, bookPage.getPageable(), bookPage.getTotalPages());
             return new ResponseDTO<>(true, 0, "OK", result, null);
         } catch (Exception e) {

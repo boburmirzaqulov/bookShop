@@ -29,7 +29,10 @@ public class PublisherService {
         try {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<Publisher> publisherPage = publisherRepository.findAll(pageRequest);
-            List<PublisherDTO> publishers = publisherPage.stream().map(e -> PublisherMapping.toDto(e, e.getBooks())).collect(Collectors.toList());
+            List<PublisherDTO> publishers = publisherPage
+                    .stream()
+                    .map(e -> PublisherMapping.toDto(e, e.getBooks()))
+                    .collect(Collectors.toList());
             Page<PublisherDTO> result = new PageImpl<>(publishers, publisherPage.getPageable(), publisherPage.getTotalPages());
             return new ResponseDTO<>(true, 0, "OK", result, null);
         } catch (Exception e){

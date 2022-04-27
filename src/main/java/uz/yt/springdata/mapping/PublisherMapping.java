@@ -13,7 +13,10 @@ public class PublisherMapping {
         if (publisher == null) return null;
         List<BookDTO> books2 = null;
         if (books != null) {
-            books2 = books.stream().map(e -> BookMapping.toDto(e, e.getAuthor(), null)).collect(Collectors.toList());
+            books2 = books
+                    .stream()
+                    .map(e -> BookMapping.toDto(e, e.getAuthor(), null))
+                    .collect(Collectors.toList());
         }
         return  new PublisherDTO(
                 publisher.getId(),
