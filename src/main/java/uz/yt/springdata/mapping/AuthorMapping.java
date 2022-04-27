@@ -16,7 +16,7 @@ public class AuthorMapping {
         if (books != null) {
             books2 = books
                     .stream()
-                    .map(e -> BookMapping.toDto(e, null, null))
+                    .map(book -> BookMapping.toDto(book, null, null))
                     .collect(Collectors.toList());
         }
         return new AuthorDTO(
