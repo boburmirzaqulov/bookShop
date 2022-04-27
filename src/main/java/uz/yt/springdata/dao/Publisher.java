@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "publisher")
@@ -23,5 +24,8 @@ public class Publisher {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "addressid")
     private Address address;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "publisher")
+    private List<Book> books;
 
 }

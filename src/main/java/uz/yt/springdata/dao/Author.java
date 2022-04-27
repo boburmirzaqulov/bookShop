@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "authors")
@@ -26,4 +27,7 @@ public class Author {
 
     @Column(name = "birthdate")
     private Date birthDate;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "author")
+    private List<Book> books;
 }

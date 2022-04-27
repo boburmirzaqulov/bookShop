@@ -5,7 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import uz.yt.springdata.dao.Author;
 import uz.yt.springdata.dao.Book;
+import uz.yt.springdata.dao.Publisher;
 import uz.yt.springdata.dto.BookDTO;
 import uz.yt.springdata.dto.ResponseDTO;
 import uz.yt.springdata.mapping.AuthorMapping;
@@ -32,11 +34,10 @@ public class BookService {
             Page<Book> bookPage = bookRepository.findAll(pageRequest);
             List<BookDTO> bookDTOList = new ArrayList<>();
             for (Book book : bookPage) {
-                BookDTO bookDTO = BookMapping.toDto(book);
-                bookToBookDto(bookDTO);
+                BookDTO bookDTO = BookMapping.toDto(book, book.getAuthor(), book.getPublisher());
                 bookDTOList.add(bookDTO);
             }
-            Page<BookDTO> result = new PageImpl(bookDTOList, bookPage.getPageable(), bookPage.getTotalPages());
+            Page<BookDTO> result = new PageImpl<>(bookDTOList, bookPage.getPageable(), bookPage.getTotalPages());
             return new ResponseDTO<>(true, 0, "OK", result, null);
         } catch (Exception e) {
             e.printStackTrace();
@@ -50,7 +51,7 @@ public class BookService {
             Optional<Book> bookOptional = bookRepository.findById(id);
             if (bookOptional.isPresent()) {
                 Book book = bookOptional.get();
-                BookDTO bookDTO = BookMapping.toDto(book);
+                BookDTO bookDTO = BookMapping.toDto(book, book.getAuthor(), book.getPublisher());
                 return new ResponseDTO<>(true, 0, "OK", bookDTO, new HashMap<>());
             }
             return new ResponseDTO<>(false, -1, String.format("BookID = %d ma'lumot topilmadi", id), new BookDTO(id), null);
@@ -62,7 +63,6 @@ public class BookService {
 
     public ResponseDTO<BookDTO> addAndUpdate(BookDTO bookDTO) {
         Book book = BookMapping.toEntity(bookDTO);
-        bookToBookDto(bookDTO);
         try {
             bookRepository.save(book);
             return new ResponseDTO<>(true, 0, "OK", bookDTO, null);
@@ -72,22 +72,6 @@ public class BookService {
         }
     }
 
-    private void bookToBookDto(BookDTO bookDTO) {
-        bookDTO.setAuthor(
-                AuthorMapping.toDto(
-                        authorRepository.getById(
-                                bookDTO.getAuthor().getId()
-                        )
-                )
-        );
-        bookDTO.setPublisher(
-                PublisherMapping.toDto(
-                        publisherRepository.getById(
-                                bookDTO.getPublisher().getId()
-                        )
-                )
-        );
-    }
 
     public ResponseDTO<BookDTO> addBook(BookDTO bookDTO) {
         Map<String, String> errors = bookValid.validPost(bookDTO);
@@ -109,7 +93,6 @@ public class BookService {
                 Book book = bookOptional.get();
                 try {
                     BookMapping.setDto(bookDTO, book);
-                    bookToBookDto(bookDTO);
                     bookRepository.delete(book);
                     return new ResponseDTO<>(true, 0, "OK", bookDTO, null);
                 } catch (Exception e) {

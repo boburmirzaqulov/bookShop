@@ -1,22 +1,24 @@
 package uz.yt.springdata.mapping;
 
+import uz.yt.springdata.dao.Author;
 import uz.yt.springdata.dao.Book;
+import uz.yt.springdata.dao.Publisher;
 import uz.yt.springdata.dto.BookDTO;
 
 import java.sql.Date;
 
 public class BookMapping {
 
-    public static BookDTO toDto(Book book){
+    public static BookDTO toDto(Book book, Author author, Publisher publisher){
         return book == null ? null : new BookDTO(
                 book.getId(),
                 book.getNameUz(),
                 book.getCost(),
                 book.getPublishedDate().toString(),
                 book.getPageCount(),
-                AuthorMapping.toDto(book.getAuthor()),
+                AuthorMapping.toDto(author, null),
                 book.getGenre(),
-                PublisherMapping.toDto(book.getPublisher())
+                PublisherMapping.toDto(publisher, null)
         );
     }
 
