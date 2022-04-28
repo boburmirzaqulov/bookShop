@@ -19,8 +19,12 @@ public class Course {
 
     private String name;
 
-    private String duration;
+    private Integer duration;
 
-    @ManyToMany(mappedBy = "courses")
+    @ManyToMany
+    @JoinTable(
+            name = "course_student",
+            inverseJoinColumns = @JoinColumn(name = "student_id"),
+            joinColumns = @JoinColumn(name = "course_id"))
     List<Student> students;
 }
